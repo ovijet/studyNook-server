@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -30,9 +30,23 @@ async function run() {
 
     const db = client.db("studyNook");
     const studyCollection = db.collection("study");
+    const bookingCollection = db.collection("booking");
 
     app.get("/study", async (req, res) => {
       const result = await studyCollection.find().toArray();
+      res.json(result);
+    });
+
+    app.get("/study/:id", async (req, res) => {
+      const { id } = req.params;
+
+      const result = await studyCollection.findOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
+
+    app.post("/booking", async (req, res) => {
+      const booking = req.body;
+      const result = await bookingCollection.insertOne(booking);
       res.json(result);
     });
 
