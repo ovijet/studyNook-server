@@ -37,11 +37,32 @@ async function run() {
       res.json(result);
     });
 
+    app.get("/booking/:userId", async (req, res) => {
+      const { userId } = req.params;
+
+      const result = await bookingCollection.find({ userId }).toArray();
+
+      res.json(result);
+    });
+
+    app.get("/booking", async (req, res) => {
+      const result = await bookingCollection.find().toArray();
+
+      res.send(result);
+    });
+
     app.get("/study/:id", async (req, res) => {
       const { id } = req.params;
 
       const result = await studyCollection.findOne({ _id: new ObjectId(id) });
       res.send(result);
+    });
+
+    app.get("/booking/:userId", async (req, res) => {
+      const { userId } = req.params;
+
+      const result = await bookingCollection.find({ userId }).toArray();
+      res.json(result);
     });
 
     app.post("/booking", async (req, res) => {
