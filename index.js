@@ -6,6 +6,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const dotenv = require("dotenv");
 const cors = require("cors");
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 dotenv.config();
 
 app.use(cors());
@@ -26,6 +27,31 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
+
+const JWKS=createRemoteJWKSet(
+  new URL('http://localhost:3000/api/auth/jwks')
+)
+
+const token= async(req,res,next)=>{
+    const auth=req.headers.authorization
+    if (!auth) {
+      return res.status(401).json({message:'unauthorized'})
+    }
+    const token=auth.split(' ')[1]
+     if (!token) {
+      return res.status(401).json({message:'unauthorized'})
+    }
+    console.log(token,'xxxx');
+         try {
+            const {payload}=await jwtVerify(token,JWKS)
+          next()
+         } catch (error) {
+  return res.status(403).json({message:'forbidden'})
+         }
+}
+
+
 
 
 async function run() {
@@ -55,25 +81,23 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/study/:id", async (req, res) => {
-      const { id } = req.params;
+    app.get("/study/:id",
 
-      const result = await studyCollection.findOne({ _id: new ObjectId(id) });
-      res.send(result);
+token,
+
+
+  async (req, res) => {
+    const { id } = req.params;
+
+    const result = await studyCollection.findOne({
+      _id: new ObjectId(id),
     });
 
-    // app.get("/booking/:userId", async (req, res) => {
-    //   const { userId } = req.params;
+    res.send(result);
+  }
+);
 
-    //   const result = await bookingCollection.find({ userId }).toArray();
-    //   res.json(result);
-    // });
-
-    // app.post("/booking", async (req, res) => {
-    //   const booking = req.body;
-    //   const result = await bookingCollection.insertOne(booking);
-    //   res.json(result);
-    // });
+   
 
     app.post("/booking", async (req, res) => {
   const booking = req.body;
@@ -86,7 +110,7 @@ async function run() {
   res.json(result);
 });
 
-    app.post("/study", async (req, res) => {
+    app.post("/study", token, async (req, res) => {
       const study = req.body;
 
       console.log(study);
