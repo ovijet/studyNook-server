@@ -1,3 +1,6 @@
+const dns = require("node:dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
@@ -15,7 +18,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 const uri = process.env.MONGODB_URI;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -23,6 +26,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
 
 async function run() {
   try {
@@ -58,18 +62,29 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/booking/:userId", async (req, res) => {
-      const { userId } = req.params;
+    // app.get("/booking/:userId", async (req, res) => {
+    //   const { userId } = req.params;
 
-      const result = await bookingCollection.find({ userId }).toArray();
-      res.json(result);
-    });
+    //   const result = await bookingCollection.find({ userId }).toArray();
+    //   res.json(result);
+    // });
+
+    // app.post("/booking", async (req, res) => {
+    //   const booking = req.body;
+    //   const result = await bookingCollection.insertOne(booking);
+    //   res.json(result);
+    // });
 
     app.post("/booking", async (req, res) => {
-      const booking = req.body;
-      const result = await bookingCollection.insertOne(booking);
-      res.json(result);
-    });
+  const booking = req.body;
+
+  const result = await bookingCollection.insertOne({
+    ...booking,
+    createdAt: new Date(),
+  });
+
+  res.json(result);
+});
 
     app.post("/study", async (req, res) => {
       const study = req.body;
