@@ -30,7 +30,7 @@ const client = new MongoClient(uri, {
 
 
 const JWKS=createRemoteJWKSet(
-  new URL('http://localhost:3000/api/auth/jwks')
+  new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
 )
 
 const token= async(req,res,next)=>{
@@ -52,11 +52,9 @@ const token= async(req,res,next)=>{
 }
 
 
-
-
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("studyNook");
     const studyCollection = db.collection("study");
@@ -74,6 +72,25 @@ async function run() {
 
       res.json(result);
     });
+
+
+    app.get("/my-listings", async (req, res) => {
+  try {
+    const email = req.query.email;
+
+    if (!email) {
+      return res.status(400).send({ message: "Email required" });
+    }
+
+    const result = await studyCollection
+      .find({ ownerEmail: email })
+      .toArray();
+
+    res.send(result);
+  } catch (error) {
+    res.status(500).send({ message: "Server error" });
+  }
+});
 
     app.get("/booking", async (req, res) => {
       const result = await bookingCollection.find().toArray();
@@ -97,6 +114,46 @@ token,
   }
 );
 
+
+// listing er jonno post
+
+app.post("/study", async (req, res) => {
+  try {
+    const room = req.body;
+
+    // DB insert
+    const result = await studyCollection.insertOne(room);
+
+    res.status(201).send({
+      success: true,
+      message: "Room created successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).send({ error: "Server error" });
+  }
+});
+
+
+// listing er jonno get
+// app.get("/study/my", async (req, res) => {
+//   try {
+//     const email = req.query.email; // or from token
+
+//     if (!email) {
+//       return res.status(400).send({ error: "Email required" });
+//     }
+
+//     const myRooms = await RoomCollection
+//       .find({ ownerEmail: email })
+//       .toArray();
+
+//     res.send(myRooms);
+//   } catch (error) {
+//     res.status(500).send({ error: "Server error" });
+//   }
+// });
+
    
 
     app.post("/booking", async (req, res) => {
@@ -118,7 +175,7 @@ token,
       res.json(data);
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
     );
