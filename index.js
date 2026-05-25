@@ -65,6 +65,11 @@ async function run() {
       res.json(result);
     });
 
+    app.get('/featured',async (req,res)=>{
+      const result =await studyCollection.find().limit(3).toArray()
+      res.json(result)
+    })
+
     app.get("/booking/:userId", async (req, res) => {
       const { userId } = req.params;
 
