@@ -120,14 +120,40 @@ token,
 );
 
 
+app.patch('/study/:id', async(req,res)=>{
+  const{id}=req.params
+  const updateData=req.body
+console.log(updateData);
+  const result=await studyCollection.updateOne(
+    {_id:new ObjectId(id)},
+    {$set:updateData}
+  )
+  res.json(result)
+})
+
+app.delete('/study/:id',async(req,res)=>{
+  const {id}=req.params
+  const result=await studyCollection.deleteOne({_id: new ObjectId(id)})
+  res.json(result)
+})
+
 // listing er jonno post
 
 app.post("/study", async (req, res) => {
   try {
-    const room = req.body;
+   const newRoom = {
+  roomName: req.body.roomName,
+  image: req.body.image,
+  capacity: req.body.capacity,
+  hourlyRate: req.body.hourlyRate,
+  floor: req.body.floor,
+  description: req.body.description,
+  amenities: req.body.amenities,
+  ownerEmail: req.body.ownerEmail,
+};
 
     // DB insert
-    const result = await studyCollection.insertOne(room);
+    const result = await studyCollection.insertOne(newRoom);
 
     res.status(201).send({
       success: true,
@@ -140,24 +166,6 @@ app.post("/study", async (req, res) => {
 });
 
 
-// listing er jonno get
-// app.get("/study/my", async (req, res) => {
-//   try {
-//     const email = req.query.email; // or from token
-
-//     if (!email) {
-//       return res.status(400).send({ error: "Email required" });
-//     }
-
-//     const myRooms = await RoomCollection
-//       .find({ ownerEmail: email })
-//       .toArray();
-
-//     res.send(myRooms);
-//   } catch (error) {
-//     res.status(500).send({ error: "Server error" });
-//   }
-// });
 
    
 
