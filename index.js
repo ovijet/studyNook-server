@@ -137,6 +137,7 @@ app.delete('/study/:id',async(req,res)=>{
   res.json(result)
 })
 
+
 // listing er jonno post
 
 app.post("/study", async (req, res) => {
@@ -165,7 +166,15 @@ app.post("/study", async (req, res) => {
   }
 });
 
+app.delete("/booking/:id", async (req, res) => {
+  const id = req.params.id;
 
+  const result = await bookingCollection.deleteOne({
+    _id: new ObjectId(id),
+  });
+
+  res.send(result);
+});
 
    
 
