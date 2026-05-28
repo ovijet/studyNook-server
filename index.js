@@ -166,12 +166,22 @@ app.post("/study", async (req, res) => {
   }
 });
 
-app.delete("/booking/:id", async (req, res) => {
-  const id = req.params.id;
 
-  const result = await bookingCollection.deleteOne({
-    _id: new ObjectId(id),
-  });
+
+app.patch('/booking/:id', async (req, res) => {
+
+  const { id } = req.params;
+
+  const result = await bookingCollection.updateOne(
+    {
+      _id: new ObjectId(id),
+    },
+    {
+      $set: {
+        status: "cancelled",
+      },
+    }
+  );
 
   res.send(result);
 });
