@@ -176,18 +176,57 @@ app.delete("/booking/:id", async (req, res) => {
   res.send(result);
 });
 
+
+app.post("/booking", async (req, res) => {
+  try {
+    const { roomName, date, slot } = req.body;
+
+    // 🔥 CHECK DUPLICATE BOOKING
+    const existingBooking = await bookingCollection.findOne({
+      roomName,
+      date,
+      slot,
+    });
+
+    if (existingBooking) {
+      return res.status(400).send({
+        success: false,
+        message: "This room is already booked for this time slot!",
+      });
+    }
+
+    // CREATE BOOKING
+    const result = await bookingCollection.insertOne({
+      ...req.body,
+      createdAt: new Date(),
+    });
+
+    res.status(201).send({
+      success: true,
+      message: "Booking successful",
+      data: result,
+    });
+
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
    
 
-    app.post("/booking", async (req, res) => {
-  const booking = req.body;
+//     app.post("/booking", async (req, res) => {
+//   const booking = req.body;
 
-  const result = await bookingCollection.insertOne({
-    ...booking,
-    createdAt: new Date(),
-  });
+//   const result = await bookingCollection.insertOne({
+//     ...booking,
+//     createdAt: new Date(),
+//   });
 
-  res.json(result);
-});
+//   res.json(result);
+// });
 
     app.post("/study", token, async (req, res) => {
       const study = req.body;
