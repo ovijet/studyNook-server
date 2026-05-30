@@ -30,7 +30,8 @@ const client = new MongoClient(uri, {
 
 
 const JWKS=createRemoteJWKSet(
-  new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
+   new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
+ 
 )
 
 const token= async(req,res,next)=>{
@@ -39,7 +40,7 @@ const token= async(req,res,next)=>{
       return res.status(401).json({message:'unauthorized'})
     }
     const token=auth.split(' ')[1]
-     if (!token) {
+     if (!token|| token==='undefined') {
       return res.status(401).json({message:'unauthorized'})
     }
     console.log(token,'xxxx');
@@ -50,6 +51,28 @@ const token= async(req,res,next)=>{
   return res.status(403).json({message:'forbidden'})
          }
 }
+
+
+// const token= async(req,res,next)=>{
+//   const authHeader=req?.headers.authorization
+//   if (!authHeader) {
+//     return res.status(401).json({
+//       message:'Unauthorized'
+//     })
+//   }
+//    const tokens=authHeader.split(' ')[1]
+
+//    if (!tokens) {
+//       return res.status(401).json({
+//       message:'Unauthorized'
+//     })
+//    }
+
+//   console.log(tokens,'hhhhhhhhhh');
+
+
+//   next()
+// }
 
 
 async function run() {
@@ -103,12 +126,10 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/study/:id",
 
-token,
+    //jwt
 
-
-  async (req, res) => {
+    app.get("/study/:id",token, async (req, res) => {
     const { id } = req.params;
 
     const result = await studyCollection.findOne({
